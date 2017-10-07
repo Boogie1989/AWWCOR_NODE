@@ -1,10 +1,13 @@
 const baseCRUD = require('../BaseCRUD');
+const symbols = {
+    _createRoutes: Symbol()
+};
 
 module.exports = class EmployeeCtrl extends baseCRUD {
 
-    constructor(modelName) {
-        super(modelName);
-        this.createRoutes();
+    constructor(model) {
+        super(model);
+        this[symbols._createRoutes]();
     }
 
     async getAllInDepartment(req, res) {
@@ -18,7 +21,8 @@ module.exports = class EmployeeCtrl extends baseCRUD {
         }
     }
 
-    createRoutes() {
+    [symbols._createRoutes]() {
         this.router.get('/employees/getAllInDepartment/:departmentId', this.getAllInDepartment);
     }
+
 }
