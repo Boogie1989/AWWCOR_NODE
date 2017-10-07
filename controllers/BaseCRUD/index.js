@@ -1,52 +1,53 @@
 const { Router } = require('express');
+const symbols = {
+    _createBaseRoutes: Symbol(),
+    _bindMethods: Symbol()
+};
 
 module.exports = class BaseCRUDCtrl {
-    constructor(modelName) {
-        if (!modelName) throw new Error('Model name is required param');
+
+    constructor(model) {
+        if (!model) throw new Error('Model is required param');
+        this.model = model;
         this.router = new Router();
-        this.modelName = modelName;
-        this.getAll = this.getAll.bind(this);
-        this.post = this.post.bind(this);
-        this.getById = this.getById.bind(this);
-        this.patch = this.patch.bind(this);
-        this.remove = this.remove.bind(this);
-        this.createBaseRoutes = this.createBaseRoutes.bind(this);
+        this[symbols._bindMethods]();
+        this[symbols._createBaseRoutes]();
     }
+
     async getAll(req, res) {
         try {
             const { app } = req;
-            const models = app.get('models');
-            const data = await models[this.modelName].find();
+            const data = await this.model.find();
             return res.json(data);
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }
     }
+
     async post(req, res) {
         try {
-            const { app, body } = req;
-            const models = app.get('models');
-            const instance = await models[this.modelName].create(body);
+            const { body } = req;
+            const instance = await this.model.create(body);
             return res.json(instance);
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }
     }
+
     async getById(req, res) {
         try {
-            const { app, params } = req;
-            const models = app.get('models');
-            const instance = await models[this.modelName].findById(params.id);
+            const { params } = req;
+            const instance = await this.model.findById(params.id);
             return res.json(instance);
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }
     }
+
     async patch(req, res) {
         try {
-            const { app, params, body } = req;
-            const models = app.get('models');
-            const instance = await models[this.modelName].update({ _id: params.id }, { $set: body });
+            const { params, body } = req;
+            const instance = await this.model.update({ _id: params.id }, { $set: body });
             return res.json(instance);
         } catch (error) {
             return res.status(400).json({ error: error.message });
@@ -55,21 +56,28 @@ module.exports = class BaseCRUDCtrl {
 
     async remove(req, res) {
         try {
-            const { app, params } = req;
-            const models = app.get('models');
-            const instance = await models[this.modelName].findByIdAndRemove(params.id);
+            const { params } = req;
+            const instance = await this.model.findByIdAndRemove(params.id);
             return res.json(instance);
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }
     }
 
-    createBaseRoutes() {
-        this.router.get(`/${this.modelName}s`, this.getAll);
-        this.router.get(`/${this.modelName}s/:id`, this.getById);
-        this.router.patch(`/${this.modelName}s/:id`, this.patch);
-        this.router.post(`/${this.modelName}s`, this.post);
-        this.router.delete(`/${this.modelName}s/:id`, this.remove);
-        return this.router;
+    [symbols._createBaseRoutes]() {
+        this.router.get(`/${this.model.modelName}s`, this.getAll);
+        this.router.get(`/${this.model.modelName}s/:id`, this.getById);
+        this.router.patch(`/${this.model.modelName}s/:id`, this.patch);
+        this.router.post(`/${this.model.modelName}s`, this.post);
+        this.router.delete(`/${this.model.modelName}s/:id`, this.remove);
     }
+
+    [symbols._bindMethods]() {
+        this.getAll = this.getAll.bind(this);
+        this.post = this.post.bind(this);
+        this.getById = this.getById.bind(this);
+        this.patch = this.patch.bind(this);
+        this.remove = this.remove.bind(this);
+    }
+
 }

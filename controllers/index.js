@@ -1,7 +1,11 @@
-const { departmentRouter } = require('./department');
-const { employeeRouter } = require('./employee');
+const BaseCRUD = require('./BaseCRUD');
+const EmployeeCtrl = require('./employee');
 
 module.exports = function (app) {
-    app.use(departmentRouter);
-    app.use(employeeRouter);
+
+    const { Department, Employee } = app.get('models');
+
+    app.use(new BaseCRUD(Department).router);
+    app.use(new EmployeeCtrl(Employee).router);
+
 }
