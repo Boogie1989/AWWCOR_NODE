@@ -1,4 +1,7 @@
+const EmployeeCtrl = require('./controller');
+const employeeCtrl = new EmployeeCtrl('Employee');
+
 module.exports = {
-    EmployeeCtrl: require('./controller'),
-    employeeRouter: require('./router')
+    EmployeeCtrl: EmployeeCtrl,
+    employeeRouter: employeeCtrl.createBaseRoutes()
 }

@@ -4,6 +4,7 @@ module.exports = class EmployeeCtrl extends baseCRUD {
 
     constructor(modelName) {
         super(modelName);
+        this.createRoutes();
     }
 
     async getAllInDepartment(req, res) {
@@ -15,5 +16,9 @@ module.exports = class EmployeeCtrl extends baseCRUD {
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }
+    }
+
+    createRoutes() {
+        this.router.get('/employees/getAllInDepartment/:departmentId', this.getAllInDepartment);
     }
 }

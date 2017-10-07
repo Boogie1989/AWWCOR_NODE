@@ -1,12 +1,16 @@
+const { Router } = require('express');
 
 module.exports = class BaseCRUDCtrl {
     constructor(modelName) {
         if (!modelName) throw new Error('Model name is required param');
+        this.router = new Router();
         this.modelName = modelName;
         this.getAll = this.getAll.bind(this);
         this.post = this.post.bind(this);
         this.getById = this.getById.bind(this);
         this.patch = this.patch.bind(this);
+        this.remove = this.remove.bind(this);
+        this.createBaseRoutes = this.createBaseRoutes.bind(this);
     }
     async getAll(req, res) {
         try {
@@ -47,5 +51,25 @@ module.exports = class BaseCRUDCtrl {
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }
+    }
+
+    async remove(req, res) {
+        try {
+            const { app, params } = req;
+            const models = app.get('models');
+            const instance = await models[this.modelName].findByIdAndRemove(params.id);
+            return res.json(instance);
+        } catch (error) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
+
+    createBaseRoutes() {
+        this.router.get(`/${this.modelName}s`, this.getAll);
+        this.router.get(`/${this.modelName}s/:id`, this.getById);
+        this.router.patch(`/${this.modelName}s/:id`, this.patch);
+        this.router.post(`/${this.modelName}s`, this.post);
+        this.router.delete(`/${this.modelName}s/:id`, this.remove);
+        return this.router;
     }
 }

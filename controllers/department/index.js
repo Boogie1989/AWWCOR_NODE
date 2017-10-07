@@ -1,4 +1,7 @@
+const DepartmentCtrl = require('./controller');
+const departmentCtrl = new DepartmentCtrl('Department');
+
 module.exports = {
-    DepartmentCtrl: require('./controller'),
-    departmentRouter: require('./router')
+    DepartmentCtrl: DepartmentCtrl,
+    departmentRouter: departmentCtrl.createBaseRoutes()
 }
