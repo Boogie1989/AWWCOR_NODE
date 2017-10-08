@@ -25,13 +25,11 @@ const employeeSchema = new Schema({
 });
 
 employeeSchema.pre('save', async function (next) {
-    console.log(this);
     const exist = await DepartmentModel.count({ _id: this.departmentId });
     if (exist) {
-        next();
-    } else {
-        next(new Error('DepartmentId is wrong.'));
+        return next();
     }
+    next(new Error('DepartmentId is wrong.'));
 });
 
 module.exports = mongoose.model('Employee', employeeSchema);
